@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-100;
+  }
+}
+
+@layer components {
+  .kt-btn {
+    @apply px-6 py-2 rounded-lg font-medium transition-all duration-200 ease-in-out;
+  }
+
+  .kt-btn-primary {
+    @apply kt-btn bg-kt-primary text-white hover:bg-kt-primary-active;
+  }
+
+  .kt-btn-light {
+    @apply kt-btn bg-kt-primary-light text-kt-primary hover:bg-kt-primary hover:text-white;
+  }
+
+  .kt-card {
+    @apply bg-white rounded-xl shadow-sm p-6;
+  }
+
+  .kt-input {
+    @apply rounded-lg border-gray-300 focus:border-kt-primary focus:ring focus:ring-kt-primary focus:ring-opacity-50;
+  }
+} 
