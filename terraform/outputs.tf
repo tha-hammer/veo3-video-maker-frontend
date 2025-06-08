@@ -8,7 +8,7 @@ output "frontend_bucket_name" {
   value       = google_storage_bucket.frontend.name
 }
 
-output "api_gateway_url" {
-  description = "The URL of the API Gateway."
-  value       = "https://${google_api_gateway_gateway.gateway.default_hostname}"
-} 
+# output "api_gateway_url" {
+#   description = "The URL of the API Gateway."
+#   value       = "https://${google_api_gateway_gateway.gateway.default_hostname}"
+# } 
