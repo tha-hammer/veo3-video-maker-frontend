@@ -7,9 +7,12 @@
         </h2>
       </div>
       <div class="mt-4 flex md:ml-4 md:mt-0">
-        <button type="button" class="kt-btn-primary">
+        <router-link
+          :to="{ name: 'new-presentation' }"
+          class="kt-btn-primary"
+        >
           New Presentation
-        </button>
+        </router-link>
       </div>
     </div>
 
@@ -49,5 +52,7 @@
 </template>
 
 <script setup lang="ts">
-// Component logic will be added here
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 </script> 

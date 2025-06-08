@@ -11,25 +11,35 @@
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
               <router-link
                 to="/"
-                class="border-kt-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                :class="[
+                  isCurrentRoute('/') 
+                    ? 'border-kt-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                  'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
+                ]"
               >
                 Dashboard
               </router-link>
               <router-link
                 to="/presentations"
-                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                :class="[
+                  isCurrentRoute('/presentations') 
+                    ? 'border-kt-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                  'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
+                ]"
               >
                 Presentations
               </router-link>
             </div>
           </div>
           <div class="flex items-center">
-            <button
-              type="button"
-              class="kt-btn-light"
+            <router-link
+              :to="{ name: 'new-presentation' }"
+              class="kt-btn-primary"
             >
               New Presentation
-            </button>
+            </router-link>
           </div>
         </div>
       </div>
@@ -45,5 +55,15 @@
 </template>
 
 <script setup lang="ts">
-// Component logic will be added here
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+
+const route = useRoute()
+
+const isCurrentRoute = (path: string) => {
+  if (path === '/') {
+    return route.path === '/'
+  }
+  return route.path.startsWith(path)
+}
 </script> 
