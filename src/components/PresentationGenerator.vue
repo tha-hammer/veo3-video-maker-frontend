@@ -112,69 +112,144 @@
           class="bg-blue-50 border border-blue-200 rounded-lg p-4"
         >
           <div class="space-y-4">
-            <!-- Main Status -->
-            <div class="flex items-center space-x-3">
-              <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <div>
-                <p class="text-blue-700 font-medium">{{ store.statusMessage }}</p>
+            <!-- Header -->
+            <div class="text-center pb-3 border-b border-blue-200">
+              <div class="flex items-center justify-center space-x-3 mb-2">
+                <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <h3 class="text-lg font-medium text-blue-700">Generating Presentation</h3>
               </div>
+              <p class="text-blue-600 text-sm">Please wait while we create your presentation...</p>
             </div>
 
-            <!-- Detailed Progress -->
-            <div v-if="processingDetails" class="space-y-3 font-mono text-sm">
-              <!-- Title Extraction -->
-              <div v-if="processingDetails.title" class="text-blue-700">
-                <p>📝 Title: "{{ processingDetails.title }}"</p>
-              </div>
-
-              <!-- Script Processing -->
-              <div v-if="processingDetails.slides_count" class="text-blue-700">
-                <p>✅ Generated structure for {{ processingDetails.slides_count }} slides</p>
-              </div>
-
-              <!-- Current Slide Progress -->
-              <div v-if="processingDetails.current_slide" class="space-y-2">
-                <p class="text-blue-700">
-                  📄 Processing Slide {{ processingDetails.current_slide.number }}/{{ processingDetails.slides_count }}: 
-                  {{ processingDetails.current_slide.title }}
-                </p>
-                <p class="text-blue-600 ml-3">Type: {{ processingDetails.current_slide.type }}</p>
-                
-                <!-- Background Generation Status -->
-                <div v-if="processingDetails.current_slide.background_status" class="ml-3 text-blue-600">
-                  <p>🎨 {{ processingDetails.current_slide.background_status }}</p>
-                </div>
-
-                <!-- Progress Bar -->
-                <div v-if="processingDetails.progress != null" class="mt-2">
-                  <div class="w-full bg-blue-100 rounded-full h-2.5">
-                    <div 
-                      class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
-                      :style="{ width: `${processingDetails.progress}%` }"
-                    ></div>
+            <!-- Scrollable Progress Timeline -->
+            <div class="max-h-96 overflow-y-auto bg-white rounded-lg border border-blue-100 p-4">
+              <div v-if="processingDetails" class="space-y-4">
+                <!-- Title Extraction -->
+                <div v-if="processingDetails.title" class="kt-progress-item">
+                  <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-kt-success rounded-full flex items-center justify-center">
+                      <span class="text-white text-sm font-medium">✓</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-kt-success font-medium">Title Extracted</p>
+                      <p class="text-gray-600 text-sm mt-1 break-words">"{{ processingDetails.title }}"</p>
+                    </div>
                   </div>
-                  <p class="text-xs text-blue-600 mt-1 text-right">
-                    {{ Math.round(processingDetails.progress) }}%
-                  </p>
+                </div>
+
+                <!-- Script Processing -->
+                <div v-if="processingDetails.slides_count" class="kt-progress-item">
+                  <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-kt-success rounded-full flex items-center justify-center">
+                      <span class="text-white text-sm font-medium">✓</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-kt-success font-medium">Script Structure Generated</p>
+                      <p class="text-gray-600 text-sm mt-1">
+                        Created structure for {{ processingDetails.slides_count }} slides
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Current Slide Progress -->
+                <div v-if="processingDetails.current_slide" class="kt-progress-item">
+                  <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-kt-primary rounded-full flex items-center justify-center">
+                      <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-kt-primary font-medium">
+                        Processing Slide {{ processingDetails.current_slide.number }}/{{ processingDetails.slides_count }}
+                      </p>
+                      <p class="text-gray-800 font-medium mt-1 break-words">
+                        {{ processingDetails.current_slide.title }}
+                      </p>
+                      <div class="mt-2 space-y-2">
+                        <div class="text-sm">
+                          <span class="inline-block bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs font-medium">
+                            {{ processingDetails.current_slide.type }}
+                          </span>
+                        </div>
+                        
+                        <!-- Background Generation Status -->
+                        <div v-if="processingDetails.current_slide.background_status" class="text-sm">
+                          <div class="flex items-center space-x-2">
+                            <span class="text-2xl">🎨</span>
+                            <span class="text-kt-primary">{{ processingDetails.current_slide.background_status }}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Progress Bar -->
+                      <div v-if="processingDetails.progress != null" class="mt-3">
+                        <div class="flex justify-between items-center mb-1">
+                          <span class="text-xs text-gray-600">Progress</span>
+                          <span class="text-xs text-kt-primary font-medium">
+                            {{ Math.round(processingDetails.progress) }}%
+                          </span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            class="bg-kt-primary h-2 rounded-full transition-all duration-500 ease-out" 
+                            :style="{ width: `${processingDetails.progress}%` }"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Final Steps -->
+                <div v-if="processingDetails.saving" class="kt-progress-item">
+                  <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-kt-warning rounded-full flex items-center justify-center">
+                      <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-kt-warning font-medium">Finalizing</p>
+                      <p class="text-gray-600 text-sm mt-1 break-words">{{ processingDetails.saving }}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Final Steps -->
-              <div v-if="processingDetails.saving" class="text-blue-700">
-                <p>💾 {{ processingDetails.saving }}</p>
+              <!-- Simple Status Message (Fallback) -->
+              <div 
+                v-if="!processingDetails" 
+                class="kt-progress-item"
+              >
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0 w-8 h-8 bg-kt-primary rounded-full flex items-center justify-center">
+                    <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-kt-primary font-medium">Initializing</p>
+                    <p class="text-gray-600 text-sm mt-1">Setting up presentation generation...</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Simple Status Message (Fallback) -->
-            <p 
-              v-if="!processingDetails && store.status?.message" 
-              class="text-sm text-blue-600 mt-1"
-            >
-              {{ store.status.message }}
-            </p>
+            <!-- Processing Time Indicator -->
+            <div class="text-center">
+              <p class="text-xs text-blue-500">
+                <span class="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></span>
+                This may take a few minutes to complete
+              </p>
+            </div>
           </div>
         </div>
 
@@ -242,5 +317,31 @@ async function handleGenerate() {
 
 .kt-input {
   @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
+
+.kt-progress-item {
+  @apply relative;
+}
+
+.kt-progress-item:not(:last-child)::after {
+  content: '';
+  @apply absolute left-4 top-8 w-px h-full bg-gray-200;
+}
+
+/* Custom scrollbar for progress timeline */
+.max-h-96::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-96::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-lg;
+}
+
+.max-h-96::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-lg;
+}
+
+.max-h-96::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
 }
 </style> 
