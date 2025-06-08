@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 4.0"
     }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -12,26 +16,31 @@ provider "google" {
   region  = var.region
 }
 
-# Frontend static website bucket
+provider "google-beta" {
+  project = var.project_id
+  region  = var.region
+}
+
+# Storage bucket for frontend static assets
 resource "google_storage_bucket" "frontend" {
-  name          = "${var.project_id}-frontend"
+  name          = "${var.project_id}-frontend-assets"
   location      = var.region
-  force_destroy = false
+  force_destroy = true # Set to false in production
+
+  uniform_bucket_level_access = true
 
   website {
     main_page_suffix = "index.html"
     not_found_page   = "index.html"
   }
-
-  cors {
-    origin          = ["*"]
-    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
-    response_header = ["*"]
-    max_age_seconds = 3600
-  }
-
-  uniform_bucket_level_access = true
 }
+
+# Allow public access to the frontend bucket
+/* resource "google_storage_bucket_iam_member" "public_access" {
+  bucket = google_storage_bucket.frontend.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+} */
 
 # Cloud Build trigger for frontend
 resource "google_cloudbuild_trigger" "frontend" {
@@ -40,7 +49,7 @@ resource "google_cloudbuild_trigger" "frontend" {
   
   github {
     owner = var.github_owner
-    name  = var.github_repo
+    name  = var.github_frontend_repo
     push {
       branch = "^main$"
     }
@@ -102,4 +111,36 @@ resource "google_compute_global_forwarding_rule" "frontend" {
   name       = "frontend-forwarding-rule"
   target     = google_compute_target_https_proxy.frontend[0].self_link
   port_range = "443"
-} 
+}
+
+# API Gateway for backend functions
+resource "google_api_gateway_api" "api" {
+  provider = google-beta
+  api_id   = var.api_gateway_name
+}
+
+resource "google_api_gateway_api_config" "api_cfg" {
+  provider = google-beta
+  api      = google_api_gateway_api.api.api_id
+  api_config_id_prefix = "veo3-cfg"
+
+  openapi_documents {
+    document {
+      path = "spec.yaml"
+      contents = base64encode(templatefile("${path.module}/openapi_spec.yaml.tftpl", {
+        process_presentation_url = data.terraform_remote_state.backend.outputs.process_presentation_function_url
+        generate_background_url = data.terraform_remote_state.backend.outputs.generate_background_function_url
+      }))
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_api_gateway_gateway" "gateway" {
+  provider = google-beta
+  api_config = google_api_gateway_api_config.api_cfg.id
+  gateway_id = var.api_gateway_name
+  display_name = var.api_gateway_name
+}

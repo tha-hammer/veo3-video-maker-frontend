@@ -1,0 +1,28 @@
+swagger: "2.0"
+info:
+  title: "Veo3 Presentation API"
+  description: "API for processing presentations and generating assets."
+  version: "1.0.0"
+schemes:
+  - "https"
+produces:
+  - "application/json"
+paths:
+  /process-presentation:
+    post:
+      summary: "Process a presentation script"
+      operationId: "processPresentation"
+      x-google-backend:
+        address: ${process_presentation_url}
+      responses:
+        "200":
+          description: "OK"
+  /generate-background:
+    post:
+      summary: "Generate a background image for a slide"
+      operationId: "generateBackground"
+      x-google-backend:
+        address: ${generate_background_url}
+      responses:
+        "200":
+          description: "OK" 

@@ -14,25 +14,31 @@ variable "github_owner" {
   type        = string
 }
 
-variable "github_repo" {
+variable "github_frontend_repo" {
   description = "The name of the frontend GitHub repository"
   type        = string
 }
 
 variable "enable_cdn" {
-  description = "Whether to enable Cloud CDN"
+  description = "Flag to enable/disable the CDN and Load Balancer"
   type        = bool
   default     = false
 }
 
+variable "load_balancer_name" {
+  description = "The name for the CDN Load Balancer"
+  type        = string
+  default     = "veo3-frontend-lb"
+}
+
 variable "domain_name" {
-  description = "Domain name for the frontend (optional)"
+  description = "The custom domain name for the frontend (optional)"
   type        = string
   default     = ""
 }
 
-variable "load_balancer_name" {
-  description = "Name of the load balancer (if CDN enabled)"
+variable "api_gateway_name" {
+  description = "The name for the API Gateway."
   type        = string
-  default     = "veo3-frontend-lb"
+  default     = "veo3-frontend-gateway"
 } 
