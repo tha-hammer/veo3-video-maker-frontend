@@ -110,6 +110,8 @@ resource "google_cloudbuild_trigger" "frontend_cd" {
   substitutions = {
     _FRONTEND_BUCKET = google_storage_bucket.frontend.name
     _LOAD_BALANCER_NAME = var.load_balancer_name
+    _STORAGE_BUCKET = google_storage_bucket.frontend.name
+    _CDN_URL_MAP = var.load_balancer_name
   }
   
   filename = "cloudbuild.yaml"

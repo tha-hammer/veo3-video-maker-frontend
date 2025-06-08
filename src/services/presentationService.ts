@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { API_CONFIG, isUsingCloudBackend } from '../config/api';
 
 // Types
 export interface PresentationRequest {
@@ -64,10 +65,9 @@ class PresentationService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: 'http://localhost:8000',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      baseURL: API_CONFIG.baseURL,
+      timeout: API_CONFIG.timeout,
+      headers: API_CONFIG.headers,
     });
     this.pollingIntervals = new Map();
     this.presentationDataCache = new Map();
@@ -77,12 +77,31 @@ class PresentationService {
       response => response,
       error => {
         console.error('API Error:', error.response?.data || error.message);
-        if (error.response?.status === 404) {
-          throw new Error('API endpoint not found. Please check if the backend server is running and the URL is correct.');
+        
+        // Different error handling for cloud vs local
+        if (isUsingCloudBackend()) {
+          if (error.response?.status === 404) {
+            throw new Error('API endpoint not found. The backend service might be starting up.');
+          }
+          if (error.response?.status === 503) {
+            throw new Error('Backend service is temporarily unavailable. Please try again in a moment.');
+          }
+        } else {
+          if (error.response?.status === 404) {
+            throw new Error('API endpoint not found. Please check if the backend server is running locally.');
+          }
         }
+        
         throw error;
       }
     );
+
+    // Log the configuration for debugging
+    console.log('API Configuration:', {
+      baseURL: API_CONFIG.baseURL,
+      timeout: API_CONFIG.timeout,
+      isCloudBackend: isUsingCloudBackend(),
+    });
   }
 
   async createPresentation(request: PresentationRequest): Promise<JobResponse> {
