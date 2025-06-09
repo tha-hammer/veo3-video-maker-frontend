@@ -4,7 +4,7 @@ import {
   presentationService, 
   type StatusResponse,
   type PresentationData,
-  type ProcessingDetails,
+  /* type ProcessingDetails, */
   type PresentationRequest,
   JobStatus
 } from '@/services/presentationService';
@@ -39,7 +39,10 @@ export const usePresentationStore = defineStore('presentation', () => {
         script: script.value,
         enhanced_mode: options.enhanced_mode
       };
-      const { job_id, status_url } = await presentationService.createPresentation(request);
+/*       const { job_id, status_url } = await presentationService.createPresentation(request);
+      currentJobId.value = job_id; The original code uses this status_url but it's not used. Typical for an LLM coder.*/
+
+      const { job_id } = await presentationService.createPresentation(request);
       currentJobId.value = job_id;
 
       // Poll for status

@@ -37,18 +37,21 @@ resource "google_storage_bucket" "frontend" {
 
 # Allow public access to the frontend bucket
 # Note: This may be blocked by organization policies - can be enabled later if needed
-# resource "google_storage_bucket_iam_member" "public_access" {
-#   bucket = google_storage_bucket.frontend.name
-#   role   = "roles/storage.objectViewer"
-#   member = "allUsers"
-# }
+resource "google_storage_bucket_iam_member" "public_access" {
+  bucket = google_storage_bucket.frontend.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
 
 # Enable required APIs
 resource "google_project_service" "required_apis" {
   for_each = toset([
     "cloudbuild.googleapis.com",
     "storage.googleapis.com",
-    "compute.googleapis.com"
+    "compute.googleapis.com",
+    "apigateway.googleapis.com",
+    "servicecontrol.googleapis.com",
+    "servicemanagement.googleapis.com"
   ])
   
   service = each.key
@@ -84,11 +87,12 @@ resource "google_cloudbuild_trigger" "frontend_ci" {
   substitutions = {
     _FRONTEND_BUCKET = google_storage_bucket.frontend.name
     _LOAD_BALANCER_NAME = var.load_balancer_name
+    _API_GATEWAY_URL = "https://${google_api_gateway_gateway.gateway.default_hostname}"
   }
   
   filename = "cloudbuild.yaml"
   
-  # Use the backend's Cloud Build service account
+  # Use the backend's Cloud Build service account  
   service_account = data.terraform_remote_state.backend.outputs.cloudbuild_service_account_id
   
   depends_on = [google_project_service.required_apis]
@@ -112,6 +116,7 @@ resource "google_cloudbuild_trigger" "frontend_cd" {
     _LOAD_BALANCER_NAME = var.load_balancer_name
     _STORAGE_BUCKET = google_storage_bucket.frontend.name
     _CDN_URL_MAP = var.load_balancer_name
+    _API_GATEWAY_URL = "https://${google_api_gateway_gateway.gateway.default_hostname}"
   }
   
   filename = "cloudbuild.yaml"
@@ -165,33 +170,33 @@ resource "google_compute_global_forwarding_rule" "frontend" {
 
 # API Gateway for backend functions - commented out for now due to backend dependency
 # Uncomment after backend is fully deployed
-# resource "google_api_gateway_api" "api" {
-#   provider = google-beta
-#   api_id   = var.api_gateway_name
-# }
+resource "google_api_gateway_api" "api" {
+  provider = google-beta
+  api_id   = var.api_gateway_name
+}
 
-# resource "google_api_gateway_api_config" "api_cfg" {
-#   provider = google-beta
-#   api      = google_api_gateway_api.api.api_id
-#   api_config_id_prefix = "veo3-cfg"
+resource "google_api_gateway_api_config" "api_cfg" {
+  provider = google-beta
+  api      = google_api_gateway_api.api.api_id
+  api_config_id_prefix = "veo3-cfg"
 
-#   openapi_documents {
-#     document {
-#       path = "spec.yaml"
-#       contents = base64encode(templatefile("${path.module}/openapi_spec.yaml.tftpl", {
-#         process_presentation_url = data.terraform_remote_state.backend.outputs.process_presentation_function_url
-#         generate_background_url = data.terraform_remote_state.backend.outputs.generate_background_function_url
-#       }))
-#     }
-#   }
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
+  openapi_documents {
+    document {
+      path = "spec.yaml"
+      contents = base64encode(templatefile("${path.module}/openapi_spec.yaml.tftpl", {
+        process_presentation_url = data.terraform_remote_state.backend.outputs.process_presentation_function_url
+        generate_background_url = data.terraform_remote_state.backend.outputs.generate_background_function_url
+      }))
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
-# resource "google_api_gateway_gateway" "gateway" {
-#   provider = google-beta
-#   api_config = google_api_gateway_api_config.api_cfg.id
-#   gateway_id = var.api_gateway_name
-#   display_name = var.api_gateway_name
-# }
+resource "google_api_gateway_gateway" "gateway" {
+  provider = google-beta
+  api_config = google_api_gateway_api_config.api_cfg.id
+  gateway_id = var.api_gateway_name
+  display_name = var.api_gateway_name
+}
