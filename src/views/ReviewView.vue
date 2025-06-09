@@ -99,8 +99,8 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+/*import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const presentationId = route.params.id
+ const presentationId = route.params.id We grab the presentation id but never use it. Code uses router-link*/
 </script> 

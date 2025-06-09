@@ -1,9 +1,1 @@
-    # In veo3-video-maker-frontend/terraform/remote_state.tf
-    
-    data "terraform_remote_state" "backend" {
-      backend = "gcs"
-      config = {
-        bucket = "veo3-video-maker-tfstate"
-        prefix = "terraform/state"
-      }
-    }
+# This file is no longer needed as remote state is defined in main.tf

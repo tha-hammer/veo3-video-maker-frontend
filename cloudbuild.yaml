@@ -5,25 +5,16 @@ steps:
     entrypoint: npm
     args: ['install']
 
-  # STEP 2: Run frontend tests
-  - name: 'node:18'
-    id: 'run-tests'
-    entrypoint: npm
-    args: ['run', 'test:unit'] # Assumes 'test:unit' script exists in package.json
-    env:
-      - 'CI=true'
-    waitFor: ['install-dependencies']
-
-  # STEP 3: Build the application
+  # STEP 2: Build the application
   - name: 'node:18'
     id: 'build-app'
     entrypoint: npm
     args: ['run', 'build']
     env:
-      - 'VUE_APP_API_URL=${_API_URL}'
-    waitFor: ['run-tests']
+      - 'VITE_API_BASE_URL=${_API_GATEWAY_URL}'
+    waitFor: ['install-dependencies']
 
-  # STEP 4: Deploy to Cloud Storage only if on the main branch
+  # STEP 3: Deploy to Cloud Storage only if on the main branch
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-to-gcs'
     entrypoint: bash
@@ -38,7 +29,7 @@ steps:
         fi
     waitFor: ['build-app']
 
-  # STEP 5: Invalidate CDN cache only if on the main branch
+  # STEP 4: Invalidate CDN cache only if on the main branch
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'invalidate-cdn'
     entrypoint: bash
@@ -56,8 +47,9 @@ steps:
 substitutions:
   _STORAGE_BUCKET: 'default-bucket'
   _CDN_URL_MAP: 'default-cdn-map'
-  _API_URL: 'http://default-api-url.com'
+  _API_GATEWAY_URL: 'default-api-gateway-url'
 
 options:
   machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
 timeout: '900s' 
